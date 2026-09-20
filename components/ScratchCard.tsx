@@ -107,6 +107,7 @@ export default function ScratchCard({
   // finger just works, no separate mobile handling needed.
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (revealed) return;
+    e.preventDefault(); // stop browser scroll from winning the gesture race on mobile
     (e.target as HTMLCanvasElement).setPointerCapture(e.pointerId);
     drawing.current = true;
     const p = pointFromEvent(e);
@@ -131,7 +132,10 @@ export default function ScratchCard({
   return (
     <div
       ref={wrapRef}
-      className={`relative overflow-hidden rounded-xl border border-rule/60 bg-highlight/40 ${className}`}
+      // touch-none on the wrapper guarantees the scroll container won't
+      // intercept finger gestures before they reach the canvas on mobile.
+      style={{ touchAction: "none" }}
+      className={`relative overflow-hidden rounded-xl border border-rule/60 bg-highlight/40 touch-none ${className}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -147,6 +151,7 @@ export default function ScratchCard({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
+        onPointerCancel={handlePointerUp}
         className={`absolute inset-0 w-full h-full touch-none cursor-crosshair transition-opacity duration-700 ${revealed ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
       />
